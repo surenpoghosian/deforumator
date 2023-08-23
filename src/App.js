@@ -9,8 +9,157 @@ function App() {
   const [inputText, setInputText] = useState('');
   const [inputPrompts, setInputPrompts] = useState([]);
   const [generatedConfig, setGeneratedConfig] = useState('');
-  const [stepCounts, setStepCounts] = useState([0.05, 0.05, 0.05]); // Initial step counts
-  const step_titles = ["translation_x", "rotation_3d_y", "rotation_3d_z"]
+  const [initSettings, setInitSettings] = useState();
+
+  
+  const [stepCounts, setStepCounts] = useState([
+    { title: "Translation X", value: 0.05 },
+    { title: "Rotation 3D Y", value: 0.05 },
+    { title: "Rotation 3D Z", value: 0.05 }
+  ]);
+
+  
+
+  function generateSettings(){
+    let dict = {}
+    let translation_x = {}
+    let rotation_3d_y = {}
+    let rotation_3d_z = {}
+
+    const translation_x_VALUE = 2
+    const rotation_3d_y_VALUE = 0.5
+    const rotation_3d_z_VALUE = 0.125
+
+
+    inputPrompts.map((item, index) => {
+      if(index == 0){
+        dict[`0`] = basePrompt
+        dict[`${(index + 1) * 70}`] = item.text
+
+        if(inputPrompts.length == 1){
+          for(var i=2; i <= 3; i++){
+            dict[`${(index + i) * 70}`] = basePrompt
+          }
+        }
+
+      } else if(index != inputPrompts.length - 1 ) {
+        for(var i=1; i <= 3; i++){
+          dict[`${(index + i) * 70}`] = basePrompt
+        }
+
+        dict[`${(index + 4) * 70}`] = item.text
+      
+      } else {
+        for(var i=4; i <= 6; i++){
+          dict[`${(index + i) * 70}`] = basePrompt
+        }
+
+        dict[`${(index + 7) * 70}`] = item.text
+
+        for(var i=8; i <= 9; i++){
+          dict[`${(index + i) * 70}`] = basePrompt
+        }
+      }
+
+    })
+
+    let j = 0
+
+    for(var i = 0; i <= Object.keys(dict).length - 1; i++){
+
+
+      if (j == 8) {
+        j = 0
+      }
+
+      switch (j){
+        case 0:
+
+          translation_x[`${i * 70}`] = translation_x_VALUE * -1
+
+          rotation_3d_y[`${i * 70}`] = rotation_3d_y_VALUE
+
+          rotation_3d_z[`${i * 70}`] = rotation_3d_z_VALUE
+          break;
+        case 1:
+
+          translation_x[`${i * 70}`] = translation_x_VALUE
+
+          rotation_3d_y[`${i * 70}`] = rotation_3d_y_VALUE * -1
+
+          rotation_3d_z[`${i * 70}`] = rotation_3d_z_VALUE * -1
+          break;
+
+        case 2:
+
+          translation_x[`${i * 70}`] = translation_x_VALUE
+
+          rotation_3d_y[`${i * 70}`] = rotation_3d_y_VALUE * -1
+
+          rotation_3d_z[`${i * 70}`] = rotation_3d_z_VALUE * -1
+          break;
+        case 3:
+
+          translation_x[`${i * 70}`] = translation_x_VALUE * -1
+
+          rotation_3d_y[`${i * 70}`] = rotation_3d_y_VALUE
+
+          rotation_3d_z[`${i * 70}`] = rotation_3d_z_VALUE
+          break;
+        case 4:
+
+          translation_x[`${i * 70}`] = translation_x_VALUE * -1
+
+          rotation_3d_y[`${i * 70}`] = rotation_3d_y_VALUE
+
+          rotation_3d_z[`${i * 70}`] = rotation_3d_z_VALUE
+          break;
+        case 5:
+
+          translation_x[`${i * 70}`] = translation_x_VALUE * -1
+
+          rotation_3d_y[`${i * 70}`] = rotation_3d_y_VALUE
+
+          rotation_3d_z[`${i * 70}`] = rotation_3d_z_VALUE
+          break;
+        case 6:
+
+          translation_x[`${i * 70}`] = translation_x_VALUE * -1
+
+          rotation_3d_y[`${i * 70}`] = rotation_3d_y_VALUE
+
+          rotation_3d_z[`${i * 70}`] = rotation_3d_z_VALUE
+          break;
+        case 7:
+
+          translation_x[`${i * 70}`] = translation_x_VALUE
+
+          rotation_3d_y[`${i * 70}`] = rotation_3d_y_VALUE * -1
+
+          rotation_3d_z[`${i * 70}`] = rotation_3d_z_VALUE * -1
+          break;
+        default:
+          console.log("default BOOM")
+          break;
+      }
+
+      j = j+1
+  }
+
+    // console.log("dict",dict)
+    // console.log("translation_x",translation_x)
+    // console.log("rotation_3d_y",rotation_3d_y)
+    // console.log("rotation_3d_z",rotation_3d_z)
+
+
+    return {
+      prompts: dict,
+      translation_x: translation_x,
+      rotation_3d_y: rotation_3d_y,
+      rotation_3d_z: rotation_3d_z
+    }
+  }
+  
   const modifyStepCount = (index, increment) => {
     setStepCounts((prevCounts) => {
       const newCounts = [...prevCounts];
@@ -59,15 +208,29 @@ function App() {
     setInputPrompts((prevPrompts) => prevPrompts.filter((_, i) => i !== index));
   };
 
-  const generateConfig = () => {
-    
+  const subumitConfigs = () => {
+
 
     const configContent = {
       basePrompt: basePrompt,
       prompts: inputPrompts.map((prompt) => prompt.text),
     };
 
-    setGeneratedConfig(JSON.stringify(configContent, null, 2));
+    
+
+    let generatedValues = generateSettings()
+
+    initConfigs.prompts = generatedValues.prompts
+    initConfigs.translation_x = generatedValues.translation_x
+    initConfigs.rotation_3d_y = generatedValues.rotation_3d_y
+    initConfigs.rotation_3d_z = generatedValues.rotation_3d_z
+    
+    setGeneratedConfig(JSON.stringify(initConfigs, null, 2));
+
+    // console.log(initConfigs)
+
+    // setInitSettings(JSON.stringify(initConfigs, null, 2))
+
   };
 
   return (
@@ -78,18 +241,24 @@ function App() {
         Configuration Generator
       </Typography>
 
-      {stepCounts.map((stepCount, index) => (
+      <Typography variant="h6" component="h1" gutterBottom>
+        Deforumator 3000
+      </Typography>
+
+
+      {/* {stepCounts.map((step, index) => (
           <div key={index} style={{ marginTop: '20px' }}>
-            <Typography variant="h6">Step Count {index + 1}</Typography>
+            <Typography variant="h6">{step.title}</Typography>
             <Button variant="outlined" onClick={() => modifyStepCount(index, false)} sx={{ marginRight: '10px' }}>
               -
             </Button>
-            <span>{stepCount}</span>
+            <span>{step.value}</span>
             <Button variant="outlined" onClick={() => modifyStepCount(index, true)} sx={{ marginLeft: '10px' }}>
               +
             </Button>
           </div>
         ))}
+       */}
 
 
       <div>
@@ -125,7 +294,7 @@ function App() {
         </Button>
         <Button
           variant="contained"
-          onClick={generateConfig}
+          onClick={subumitConfigs}
           sx={{ backgroundColor: '#007bff', color: '#fff' }}
         >
           Generate Config
@@ -180,13 +349,6 @@ function App() {
         )}
       </div>
       {generatedConfig && (
-        <Typography variant="body1" sx={{ marginTop: '20px', fontSize: '18px' }}>
-          Generated Config:
-          <br />
-          <code>{generatedConfig}</code>
-        </Typography>
-      )}
-      {generatedConfig && (
         <Link
           href={`data:text/plain;charset=utf-8,${encodeURIComponent(
             generatedConfig
@@ -205,6 +367,14 @@ function App() {
           Download Config File
         </Link>
       )}
+      {generatedConfig && (
+        <Typography variant="body1" sx={{ marginTop: '20px', fontSize: '18px' }}>
+          Generated Config:
+          <br />
+          <code>{generatedConfig}</code>
+        </Typography>
+      )}
+     
     </Container>
   </ThemeProvider>
   );
@@ -223,7 +393,7 @@ let initConfigs = {
   "restore_faces": false,
   "seed_resize_from_w": 0,
   "seed_resize_from_h": 0,
-  "seed": 2373535357,
+  "seed": -1,
   "sampler": "Euler a",
   "steps": 35,
   "batch_name": "Deforum_20230817134035",
@@ -247,31 +417,33 @@ let initConfigs = {
   "reroll_blank_frames": "ignore",
   "reroll_patience": 10.0,
   "motion_preview_mode": false,
+  
   "prompts": {
-      "0": "     henry cavill as james bond, casino, key art, palm trees, highly detailed, artstation, concept art, cinematic lighting, sharp focus, illustration, by gaston bussiere alphonse mucha,  (full body), (far from the camera) --neg deformed, disfigured, nsfw, nude     nsfw, nude  nsfw, nude, sunshine, shiny, naked, close to camera",
-      "140": "    Darth Vader wearing a Speedo at the beach, sharp focus, trending on ArtStation, masterpiece, by Greg Rutkowski, by Ross Tran, by Fenghua Zhong, octane, soft render, oil on canvas, colorful, cinematic, environmental concept art, (full body), (far from the camera)  --neg deformed, disfigured,  nsfw, nude    nsfw, nude  nsfw, nude, sunshine, shiny, naked, close to camera",
-      "210": "     henry cavill as james bond, casino, key art, palm trees, highly detailed, artstation, concept art, cinematic lighting, sharp focus, illustration, by gaston bussiere alphonse mucha, (full body), (far from the camera)  --neg deformed, disfigured, nsfw, nude    nsfw, nude  nsfw, nude, sunshine, shiny, naked, close to camera",
-      "280": "     henry cavill as james bond, casino, key art, palm trees, highly detailed, artstation, concept art, cinematic lighting, sharp focus, illustration, by gaston bussiere alphonse mucha, (full body), (far from the camera)  --neg deformed, disfigured, nsfw, nude    nsfw, nude  nsfw, nude, sunshine, shiny, naked, close to camera",
-      "350": "     henry cavill as james bond, casino, key art, palm trees, highly detailed, artstation, concept art, cinematic lighting, sharp focus, illustration, by gaston bussiere alphonse mucha, (full body), (far from the camera) --neg deformed, disfigured, nsfw, nude    nsfw, nude  nsfw, nude, sunshine, shiny, naked, close to camera",
-      "420": "    greek god, gray hair, man, powerful, beautiful, ornate, beautiful, delicate, delicate, masterpiece, ice carving, hyperrealistic, cherry blossoms, water fractals, smooth, sharp focus, by caravaggio, artgerm and rembrandt and greg rutkowski and alphonse mucha,  (full body), (far from the camera), -- neg nsfw, nude  --neg nsfw, nude  nsfw, nude, sunshine, shiny, naked, close to camera",
-      "490": "     henry cavill as james bond, casino, key art, palm trees, highly detailed, artstation, concept art, cinematic lighting, sharp focus, illustration, by gaston bussiere alphonse mucha,  (full body), (far from the camera)  --neg deformed, disfigured, nsfw, nude    nsfw, nude  nsfw, nude, sunshine, shiny, naked, close to camera",
-      "560": "     henry cavill as james bond, casino, key art, palm trees, highly detailed,  artstation, concept art, cinematic lighting, sharp focus, illustration, by gaston bussiere alphonse mucha ,  (full body), (far from the camera) --neg deformed, disfigured, nsfw, nude    nsfw, nude  nsfw, nude, sunshine, shiny, naked, close to camera"
+
   },
+  
   "positive_prompts": "",
-  "negative_prompts": "nsfw, nude, sunshine, shiny, naked, close to camera",
+  "negative_prompts": "nsfw, nude, naked, close to camera",
   "animation_mode": "3D",
-  "max_frames": 560,
+  
+  "max_frames": 0,
+
   "border": "replicate",
   "angle": "0: (90), 25: (-90)",
   "zoom": "0:  (1.0025+0.002*sin(1.25*3.14*t/30))",
+
   "translation_x": "0: (-2),70: (2),140: (2),210: (-2), 280: (-2),350: (-2),420: (-2),490: (2)",
+  
   "translation_y": "0: (0)",
   "translation_z": "0: (0)",
   "transform_center_x": "0: (2)",
   "transform_center_y": "0: (0)",
   "rotation_3d_x": "0: (0)",
+  
   "rotation_3d_y": "0: (0.5),70: (-0.5),140: (-0.5),210: (0.5), 280: (0.5),350: (0.5),420: (0.5),490: (-0.5)",
+  
   "rotation_3d_z": "0: (0.125), 70: (-0.125),140: (-0.125),210: (0.125), 280: (0.125), 350: (0.125),420: (0.125),490: (-0.125)",
+  
   "enable_perspective_flip": false,
   "perspective_flip_theta": "0: (0)",
   "perspective_flip_phi": "0: (0)",
@@ -298,8 +470,10 @@ let initConfigs = {
   "use_noise_mask": false,
   "mask_schedule": "0: (\"{video_mask}\")",
   "noise_mask_schedule": "0: (\"{video_mask}\")",
-  "enable_checkpoint_scheduling": true,
+  "enable_checkpoint_scheduling": false,
+
   "checkpoint_schedule": "0: (\"realisticVisionV50_v50VAE.safetensors\"), 140: (\"revAnimated_v122.safetensors\"), 210: (\"realisticVisionV50_v50VAE.safetensors\"), 420: (\"realisticVisionV50_v50VAE.safetensors\"),  490: (\"realisticVisionV50_v50VAE.safetensors\")",
+
   "enable_clipskip_scheduling": false,
   "clipskip_schedule": "0: (2)",
   "enable_noise_multiplier_scheduling": true,
